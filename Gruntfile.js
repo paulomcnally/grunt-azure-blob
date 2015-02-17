@@ -1,35 +1,47 @@
 'use strict';
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   grunt.initConfig({
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc'
+    pkg: grunt.file.readJSON('package.json'),
+    env : {
+      options : {
+        //Shared Options Hash
       },
-      all: [
-        'Gruntfile.js',
-        'tasks/*.js',
-        'test/*.js'
-      ]
+      configCDN : {
+        AZURE_STORAGE_ACCOUNT : process.env.AZURE_STORAGE_ACCOUNT,
+        AZURE_STORAGE_ACCESS_KEY : process.env.AZURE_STORAGE_ACCESS_KEY
+      }
     },
-
-    nodeunit: {
-      tests: ['test/*_test.js']
-    },
-
-    'azureblob': {
-      options: {
-        containerName: 'test'
+    'azure-blob': {
+      options: { // global options applied to each task
+        containerName: 'grunt-azure-blob',
+        containerDelete: false, //do not apply true here, container would be deleted at each task
+        metadata: {cacheControl: 'public, max-age=31556926'}, // max-age 1 year for all entries
+        gzip: true,
+        copySimulation: false  // set true: only dry-run what copy would look like
       },
-      files: 'test/fixtures/file.js'
+      css: {
+        files: [{
+          expand: true,
+          cwd: 'example/css/',
+          dest: '<%= pkg.version %>/css/',
+          src: ['*.css']
+        }]
+      },
+      js: {
+        files: [{
+          expand: true,
+          cwd: 'example/js/',
+          dest: '<%= pkg.version %>/js/',
+          src: ['*.js']
+        }]
+      }
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-nodeunit');
-  grunt.loadTasks(__dirname+'/tasks');
+  // Load the plugin that provides all the pirate magic
+  grunt.loadTasks('tasks');
 
-  // Default task.
-  grunt.registerTask('default', ['jshint']);
-  grunt.registerTask('test', ['azureblob', 'nodeunit']);
+  // Default task(s).
+  grunt.registerTask('default', ['azure-blob']);
 };
