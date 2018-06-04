@@ -21,7 +21,7 @@
     "spa"
   ],
   "dependencies": {
-    "azure-storage": "^0.4.2",
+    "azure-storage": "^2.9.0-preview",
     "mime": "^1.3.4",
     "q": "^1.1.2",
     "tmp": "0.0.24"
